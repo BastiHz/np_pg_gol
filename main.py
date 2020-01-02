@@ -7,6 +7,7 @@
 
 import pygame as pg
 import numpy as np
+import math
 
 
 RULES = {
@@ -18,7 +19,6 @@ WORLD_HEIGHT = 400
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 800
 FPS = 60
-UPS = 20
 show_neighbors = True
 
 pg.init()
@@ -62,7 +62,8 @@ COLORS = {
 }
 
 running = True
-time_per_update = 1 / UPS * 1000  # milliseconds
+ups = 20
+time_per_update = 1 / ups * 1000  # milliseconds
 time_since_last_update = 0
 while running:
     dt = clock.tick(FPS)
@@ -77,8 +78,18 @@ while running:
                 print(clock.get_fps())
             elif event.key == pg.K_s:
                 show_neighbors = not show_neighbors
+            elif event.key == pg.K_UP:
+                ups = min(ups + 10, FPS)
+                time_per_update = 1 / ups * 1000
+            elif event.key == pg.K_DOWN:
+                ups = max(ups - 10, 0)
+                if ups > 0:
+                    time_per_update = 1 / ups * 1000
+                else:
+                    time_per_update = math.inf
 
-    time_since_last_update += dt
+    if ups > 0:
+        time_since_last_update += dt
     if time_since_last_update < time_per_update:
         continue
     time_since_last_update -= time_per_update
