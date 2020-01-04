@@ -101,6 +101,15 @@ while running:
     big_world[:, -1] = big_world[:, 1]
 
     # TODO: kann ich das Zählen der Nachbarn schneller machen?
+    # Kann ich vieleicht darauf verzichten alles auf eine größere Welt zu
+    # kopiere, indem ich da mit dem Zählen der Nachbarn schlauer mache? Ich
+    # müsste die vier Ecken und die Ränder speziell behandeln, aber das dürfte
+    # schneller ein, als immer die ganze Welt hin und her zu kopieren.
+    # Teste die Geschwindigkeit! Benchmarke und Profile! Möglichst
+    # reproduzierbar mit seed, ohne plotten, mit fester Anzahl an Updates.
+    # Stelle sicher, dass das Ergebnis richtig ist. Am besten einmal das
+    # richtige Ergebnisarray als Datei ablegen und dann die neuen Versionen
+    # damit vergleichen.
     neighbors[...] = 0
     neighbors[:-1, :] += big_world[1:, :]
     neighbors[1:, :] += big_world[:-1, :]
