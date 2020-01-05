@@ -23,18 +23,17 @@ pg.init()
 window = pg.display.set_mode(WINDOW_SIZE)
 clock = pg.time.Clock()
 small_surf = pg.Surface(WORLD_SIZE)
-neighbors = np.zeros(WORLD_SIZE, int)
 world_display = np.zeros(WORLD_SIZE, int)
-
+neighbors = np.zeros(WORLD_SIZE, int)
 
 # glider:
-# visible_world[3, 6] = 1
-# visible_world[4, 6] = 1
-# visible_world[5, 6] = 1
-# visible_world[5, 5] = 1
-# visible_world[4, 4] = 1
+# world[3, 6] = 1
+# world[4, 6] = 1
+# world[5, 6] = 1
+# world[5, 5] = 1
+# world[4, 4] = 1
 
-visible_world = np.random.choice([False, True], WORLD_SIZE, p=[0.9, 0.1])
+world = np.random.choice([False, True], WORLD_SIZE, p=[0.9, 0.1])
 
 # Using a 2d surfarray is faster than a 3d surfarray. This, however, means that
 # the colors have to be converted to integers:
@@ -91,44 +90,44 @@ while running:
 
     neighbors[...] = 0
     # W:
-    neighbors[:, :-1] += visible_world[:, 1:]
-    neighbors[:, -1] += visible_world[:, 0]
+    neighbors[:, :-1] += world[:, 1:]
+    neighbors[:, -1] += world[:, 0]
     # E:
-    neighbors[:, 1:] += visible_world[:, :-1]
-    neighbors[:, 0] += visible_world[:, -1]
+    neighbors[:, 1:] += world[:, :-1]
+    neighbors[:, 0] += world[:, -1]
     # S:
-    neighbors[:-1, :] += visible_world[1:, :]
-    neighbors[-1, :] += visible_world[0, :]
+    neighbors[:-1, :] += world[1:, :]
+    neighbors[-1, :] += world[0, :]
     # N:
-    neighbors[1:, :] += visible_world[:-1, :]
-    neighbors[0, :] += visible_world[-1, :]
+    neighbors[1:, :] += world[:-1, :]
+    neighbors[0, :] += world[-1, :]
     # SW:
-    neighbors[:-1, :-1] += visible_world[1:, 1:]
-    neighbors[-1, :-1] += visible_world[0, 1:]
-    neighbors[:-1, -1] += visible_world[1:, 0]
-    neighbors[-1, -1] += visible_world[0, 0]
+    neighbors[:-1, :-1] += world[1:, 1:]
+    neighbors[-1, :-1] += world[0, 1:]
+    neighbors[:-1, -1] += world[1:, 0]
+    neighbors[-1, -1] += world[0, 0]
     # NE:
-    neighbors[1:, 1:] += visible_world[:-1, :-1]
-    neighbors[0, 1:] += visible_world[-1, :-1]
-    neighbors[1:, 0] += visible_world[:-1, -1]
-    neighbors[0, 0] += visible_world[-1, -1]
+    neighbors[1:, 1:] += world[:-1, :-1]
+    neighbors[0, 1:] += world[-1, :-1]
+    neighbors[1:, 0] += world[:-1, -1]
+    neighbors[0, 0] += world[-1, -1]
     # SE:
-    neighbors[:-1, 1:] += visible_world[1:, :-1]
-    neighbors[-1, 1:] += visible_world[0, :-1]
-    neighbors[:-1, 0] += visible_world[1:, -1]
-    neighbors[-1, 0] += visible_world[0, -1]
+    neighbors[:-1, 1:] += world[1:, :-1]
+    neighbors[-1, 1:] += world[0, :-1]
+    neighbors[:-1, 0] += world[1:, -1]
+    neighbors[-1, 0] += world[0, -1]
     # NW:
-    neighbors[1:, :-1] += visible_world[:-1, 1:]
-    neighbors[0, :-1] += visible_world[-1, 1:]
-    neighbors[1:, -1] += visible_world[:-1, 0]
-    neighbors[0, -1] += visible_world[-1, 0]
+    neighbors[1:, :-1] += world[:-1, 1:]
+    neighbors[0, :-1] += world[-1, 1:]
+    neighbors[1:, -1] += world[:-1, 0]
+    neighbors[0, -1] += world[-1, 0]
 
-    visible_world[...] = np.logical_or(
+    world[...] = np.logical_or(
         np.logical_and(
-            np.logical_not(visible_world),
+            np.logical_not(world),
             np.isin(neighbors, RULES["birth"])),
         np.logical_and(
-            visible_world,
+            world,
             np.isin(neighbors, RULES["survive"])
         )
     )
@@ -138,8 +137,8 @@ while running:
             # FIXME: Geht das auch schneller?
             world_display[neighbors == i] = COLORS["rainbow"][i]
     else:
-        world_display[visible_world] = COLORS["bw"][1]
-        world_display[np.logical_not(visible_world)] = COLORS["bw"][0]
+        world_display[world] = COLORS["bw"][1]
+        world_display[np.logical_not(world)] = COLORS["bw"][0]
 
     pg.surfarray.blit_array(small_surf, world_display)
     pg.transform.scale(small_surf, WINDOW_SIZE, window)
