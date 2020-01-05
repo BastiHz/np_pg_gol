@@ -14,23 +14,18 @@ RULES = {
     "birth": (3,),
     "survive": (2, 3)
 }
-WORLD_WIDTH = 400
-WORLD_HEIGHT = 400
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 800
+WORLD_SIZE = (800, 800)
+WINDOW_SIZE = (800, 800)
 FPS = 60
 show_neighbors = True
 
 pg.init()
-window = pg.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
+window = pg.display.set_mode(WINDOW_SIZE)
 clock = pg.time.Clock()
-small_surf = pg.Surface([WORLD_WIDTH, WORLD_HEIGHT])
-visible_world = np.zeros([WORLD_WIDTH, WORLD_HEIGHT], int)
-big_world = np.zeros([WORLD_WIDTH + 2, WORLD_HEIGHT + 2], int)
-temp_world = np.zeros(big_world.shape, int)
-world_display = np.zeros([WORLD_WIDTH, WORLD_HEIGHT], int)
-neighbors = np.zeros(big_world.shape, int)
-visible_neighbors = np.zeros(visible_world.shape, int)
+small_surf = pg.Surface(WORLD_SIZE)
+neighbors = np.zeros(WORLD_SIZE, int)
+world_display = np.zeros(WORLD_SIZE, int)
+
 
 # glider:
 # visible_world[3, 6] = 1
@@ -39,7 +34,7 @@ visible_neighbors = np.zeros(visible_world.shape, int)
 # visible_world[5, 5] = 1
 # visible_world[4, 4] = 1
 
-visible_world = np.random.choice([0, 1], visible_world.shape, p=[0.9, 0.1])
+visible_world = np.random.choice([False, True], WORLD_SIZE, p=[0.9, 0.1])
 
 # Using a 2d surfarray is faster than a 3d surfarray. This, however, means that
 # the colors have to be converted to integers:
@@ -62,7 +57,7 @@ COLORS = {
 }
 
 running = True
-ups = 20
+ups = 60
 time_per_update = 1 / ups * 1000  # milliseconds
 time_since_last_update = 0
 while running:
@@ -94,49 +89,58 @@ while running:
         continue
     time_since_last_update -= time_per_update
 
-    big_world[1:-1, 1:-1] = visible_world
-    big_world[0, 1:-1] = visible_world[-1, :]
-    big_world[-1, 1:-1] = visible_world[0, :]
-    big_world[:, 0] = big_world[:, -2]
-    big_world[:, -1] = big_world[:, 1]
-
-    # TODO: kann ich das Zählen der Nachbarn schneller machen?
-    # Kann ich vieleicht darauf verzichten alles auf eine größere Welt zu
-    # kopiere, indem ich da mit dem Zählen der Nachbarn schlauer mache? Ich
-    # müsste die vier Ecken und die Ränder speziell behandeln, aber das dürfte
-    # schneller ein, als immer die ganze Welt hin und her zu kopieren.
-    # Teste die Geschwindigkeit! Benchmarke und Profile! Möglichst
-    # reproduzierbar mit seed, ohne plotten, mit fester Anzahl an Updates.
-    # Stelle sicher, dass das Ergebnis richtig ist. Am besten einmal das
-    # richtige Ergebnisarray als Datei ablegen und dann die neuen Versionen
-    # damit vergleichen.
     neighbors[...] = 0
-    neighbors[:-1, :] += big_world[1:, :]
-    neighbors[1:, :] += big_world[:-1, :]
-    neighbors[:, :-1] += big_world[:, 1:]
-    neighbors[:, 1:] += big_world[:, :-1]
-    neighbors[1:, 1:] += big_world[:-1, :-1]
-    neighbors[:-1, :-1] += big_world[1:, 1:]
-    neighbors[1:, :-1] += big_world[:-1, 1:]
-    neighbors[:-1, 1:] += big_world[1:, :-1]
+    # W:
+    neighbors[:, :-1] += visible_world[:, 1:]
+    neighbors[:, -1] += visible_world[:, 0]
+    # E:
+    neighbors[:, 1:] += visible_world[:, :-1]
+    neighbors[:, 0] += visible_world[:, -1]
+    # S:
+    neighbors[:-1, :] += visible_world[1:, :]
+    neighbors[-1, :] += visible_world[0, :]
+    # N:
+    neighbors[1:, :] += visible_world[:-1, :]
+    neighbors[0, :] += visible_world[-1, :]
+    # SW:
+    neighbors[:-1, :-1] += visible_world[1:, 1:]
+    neighbors[-1, :-1] += visible_world[0, 1:]
+    neighbors[:-1, -1] += visible_world[1:, 0]
+    neighbors[-1, -1] += visible_world[0, 0]
+    # NE:
+    neighbors[1:, 1:] += visible_world[:-1, :-1]
+    neighbors[0, 1:] += visible_world[-1, :-1]
+    neighbors[1:, 0] += visible_world[:-1, -1]
+    neighbors[0, 0] += visible_world[-1, -1]
+    # SE:
+    neighbors[:-1, 1:] += visible_world[1:, :-1]
+    neighbors[-1, 1:] += visible_world[0, :-1]
+    neighbors[:-1, 0] += visible_world[1:, -1]
+    neighbors[-1, 0] += visible_world[0, -1]
+    # NW:
+    neighbors[1:, :-1] += visible_world[:-1, 1:]
+    neighbors[0, :-1] += visible_world[-1, 1:]
+    neighbors[1:, -1] += visible_world[:-1, 0]
+    neighbors[0, -1] += visible_world[-1, 0]
 
-    temp_world[...] = 0
-    mask = np.logical_or(
-        np.logical_and(big_world == 0, np.isin(neighbors, RULES["birth"])),
-        np.logical_and(big_world == 1, np.isin(neighbors, RULES["survive"]))
+    visible_world[...] = np.logical_or(
+        np.logical_and(
+            np.logical_not(visible_world),
+            np.isin(neighbors, RULES["birth"])),
+        np.logical_and(
+            visible_world,
+            np.isin(neighbors, RULES["survive"])
+        )
     )
-    temp_world[mask] = 1
-    visible_world[...] = temp_world[1:-1, 1:-1]
 
     if show_neighbors:
-        visible_neighbors[...] = neighbors[1:-1, 1:-1]
         for i in range(9):
             # FIXME: Geht das auch schneller?
-            world_display[visible_neighbors == i] = COLORS["rainbow"][i]
+            world_display[neighbors == i] = COLORS["rainbow"][i]
     else:
-        for i in range(2):
-            world_display[visible_world == i] = COLORS["bw"][i]
+        world_display[visible_world] = COLORS["bw"][1]
+        world_display[np.logical_not(visible_world)] = COLORS["bw"][0]
 
     pg.surfarray.blit_array(small_surf, world_display)
-    pg.transform.scale(small_surf, [WINDOW_WIDTH, WINDOW_HEIGHT], window)
+    pg.transform.scale(small_surf, WINDOW_SIZE, window)
     pg.display.flip()
