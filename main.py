@@ -1,10 +1,3 @@
-# - Profilen und dann die Geschwindigkeit verbessern. Ich will
-#   800 * 800 Zellen @ 60 FPS. Letzter Stand (ohne Nachbarn zu plotten):
-#   rund 44 FPS. Achtung: beim Testen die UPS nicht begrenzen!
-# - schnelles addieren ohne neues array zu erzeugen: np.add(a, b, out=a),
-#   zumindest laut dem surfarray Tutorial. Hilft das? Scheint nicht so.
-
-
 import pygame as pg
 import numpy as np
 import math
@@ -26,6 +19,13 @@ small_surf = pg.Surface(WORLD_SIZE)
 world_display = np.zeros(WORLD_SIZE, int)
 neighbors = np.zeros(WORLD_SIZE, int)
 
+# all random
+# world = np.random.choice([False, True], WORLD_SIZE, p=[0.8, 0.2])
+
+# central hole
+world = np.random.choice([False, True], WORLD_SIZE, p=[0.4, 0.6])
+world[50:350, 50:350] = False
+
 # glider:
 # world = np.zeros(WORLD_SIZE, bool)
 # world[3, 6] = 1
@@ -33,8 +33,6 @@ neighbors = np.zeros(WORLD_SIZE, int)
 # world[5, 6] = 1
 # world[5, 5] = 1
 # world[4, 4] = 1
-
-world = np.random.choice([False, True], WORLD_SIZE, p=[0.9, 0.1])
 
 # Using a 2d surfarray is faster than a 3d surfarray. This, however, means that
 # the colors have to be converted to integers:
