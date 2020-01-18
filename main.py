@@ -36,7 +36,8 @@ world[50:350, 50:350] = False
 
 # Using a 2d surfarray is faster than a 3d surfarray. This, however, means that
 # the colors have to be converted to integers:
-# TODO: Use int(pygame.Color()) instead of this hack.
+# TODO: Use int(pygame.Color()) instead of this hack. But first wait for a
+#       response on that bug report.
 COLORS_NEIGHBORS = [
     int("{0:02x}{1:02x}{2:02x}".format(0, 0, 0), 16),
     int("{0:02x}{1:02x}{2:02x}".format(170, 0, 255), 16),
