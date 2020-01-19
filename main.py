@@ -35,23 +35,29 @@ world[50:350, 50:350] = False
 # world[4, 4] = 1
 
 # Using a 2d surfarray is faster than a 3d surfarray. This, however, means that
-# the colors have to be converted to integers:
-# TODO: Use int(pygame.Color()) instead of this hack. But first wait for a
-#       response on that bug report.
+# the colors have to be converted to integers.
+
+
+def rgb_to_int(r, g, b):
+    # There seems to be a bug in the __int__() method of pygame.Color objects.
+    # So until that is fixed I do the conversion manually.
+    return (r << 16) + (g << 8) + b
+
+
 COLORS_NEIGHBORS = [
-    int("{0:02x}{1:02x}{2:02x}".format(0, 0, 0), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(170, 0, 255), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(0, 0, 255), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(0, 170, 255), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(0, 255, 170), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(0, 255, 0), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(170, 255, 0), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(255, 170, 0), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(255, 0, 0), 16)
+    rgb_to_int(0, 0, 0),
+    rgb_to_int(170, 0, 255),
+    rgb_to_int(0, 0, 255),
+    rgb_to_int(0, 170, 255),
+    rgb_to_int(0, 255, 170),
+    rgb_to_int(0, 255, 0),
+    rgb_to_int(170, 255, 0),
+    rgb_to_int(255, 170, 0),
+    rgb_to_int(255, 0, 0)
 ]
 COLORS_DEAD_ALIVE = [
-    int("{0:02x}{1:02x}{2:02x}".format(0, 0, 0), 16),
-    int("{0:02x}{1:02x}{2:02x}".format(255, 255, 255), 16)
+    rgb_to_int(0, 0, 0),
+    rgb_to_int(255, 255, 255)
 ]
 
 running = True
