@@ -128,9 +128,7 @@ while running:
     neighbors[0, -1] += world[-1, 0]
 
     world[...] = np.logical_or(
-        np.logical_and(
-            np.logical_not(world),
-            np.isin(neighbors, RULES["birth"])),
+        np.isin(neighbors, RULES["birth"]),
         np.logical_and(
             world,
             np.isin(neighbors, RULES["survive"])
