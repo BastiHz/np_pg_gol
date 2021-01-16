@@ -39,8 +39,12 @@ world[50:350, 50:350] = False
 
 
 def rgb_to_int(r, g, b):
-    # There seems to be a bug in the __int__() method of pygame.Color objects.
-    # So until that is fixed I do the conversion manually.
+    # FIXME: What I thought was a bug with pygame.surfarray and pygame.Color 
+    # is just a misunderstanding. To map colors to a 2d surfarray I should 
+    # use Surface.map_rgb(). This ensures the mapped color fits the target surface.
+    # See this comment: https://github.com/pygame/pygame/issues/1563#issuecomment-761466877
+    assert False  # to remind myself to fix this 
+    
     return (r << 16) + (g << 8) + b
 
 
